@@ -1,22 +1,30 @@
 # flaskr 2.0
 
-flaskr 2.0 is a copy of the Flask Tutorial, but configured to use Redis
-instead of SQLite. This is so people can focus on learning Flask and not
-also having to learn about databases.
+The [Flask Tutorial](https://github.com/mitsuhiko/flask/tree/master/docs/tutorial)
+is great for learning Flask, but it requires the use of SQLite. Some people
+learning Flask may not have experience with relational databases as well, so
+this additional requirement becomes an unnecessary distraction. 
+
+It seems like Redis would be a much better fit over SQLite for this tutorial. It 
+would be necessary to install Redis in the development environment, but it's 
+gaining popularity (Cloud9 and Heroku both have it). I think it's worth the 
+effort to install Redis than learn SQL.
 
 This was designed for the [Cloud9](http://c9.io) environment.
 
+
 ## Requirements
 
-pip install redis-collections
-pip install Flask
+- pip install redis-collections
+- pip install Flask
 
 
 ## Start Services
 
-sudo service redis-server start
+- sudo service redis-server start
 
 
 ## Additional Reading
 
 - https://redis-collections.readthedocs.org/en/latest/
+
