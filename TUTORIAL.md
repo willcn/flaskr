@@ -169,56 +169,58 @@ directly into the module, and this is what we will be doing here. However,
 a cleaner solution would be to create a separate `.ini` or `.py` file,
 load that, and import the values from there.
 
-First, we add the imports in :file:`flaskr.py`::
+First, we add the imports in `flaskr.py`:
 
-    # all the imports
-    import os
-    from redis_collections import List
-    from flask import Flask, request, session, g, redirect, url_for, abort, \
+```python
+# all the imports
+import os
+from redis_collections import List
+from flask import Flask, request, session, g, redirect, url_for, abort, \
          render_template, flash
+```
 
 Next, we can create our actual application and initialize it with the
-config from the same file in :file:`flaskr.py`::
+config from the same file in `flaskr.py`:
 
-    # create our little application :)
-    app = Flask(__name__)
-    app.config.from_object(__name__)
+```python
+# create our little application :)
+app = Flask(__name__)
+app.config.from_object(__name__)
 
-    # Load default config and override config from an environment variable
-    app.config.update(dict(
-        DATABASE=os.path.join(app.root_path, 'flaskr.db'),
-        SECRET_KEY='development key',
-        USERNAME='admin',
-        PASSWORD='default'
-    ))
-    app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+# Load default config and override config from an environment variable
+app.config.update(dict(
+    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    SECRET_KEY='development key',
+    USERNAME='admin',
+    PASSWORD='default'
+))
+app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+```
 
 The :class:`~flask.Config` object works similarly to a dictionary so we
 can update it with new values.
 
-.. admonition:: Database Path
+Operating systems know the concept of a current working directory for
+each process.  Unfortunately, you cannot depend on this in web
+applications because you might have more than one application in the
+same process.
 
-    Operating systems know the concept of a current working directory for
-    each process.  Unfortunately, you cannot depend on this in web
-    applications because you might have more than one application in the
-    same process.
+For this reason the ``app.root_path`` attribute can be used to
+get the path to the application.  Together with the ``os.path`` module,
+files can then easily be found.  In this example, we place the
+database right next to it.
 
-    For this reason the ``app.root_path`` attribute can be used to
-    get the path to the application.  Together with the ``os.path`` module,
-    files can then easily be found.  In this example, we place the
-    database right next to it.
-
-    For a real-world application, it's recommended to use
-    :ref:`instance-folders` instead.
+For a real-world application, it's recommended to use
+:ref:`instance-folders` instead.
 
 Usually, it is a good idea to load a separate, environment-specific
 configuration file.  Flask allows you to import multiple configurations and it
 will use the setting defined in the last import. This enables robust
 configuration setups.  :meth:`~flask.Config.from_envvar` can help achieve this.
 
-.. code-block:: python
-
+```python
    app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+```
 
 Simply define the environment variable :envvar:`FLASKR_SETTINGS` that points to
 a config file to be loaded.  The silent switch just tells Flask to not complain
@@ -240,13 +242,13 @@ then tell it to use the :class:`sqlite3.Row` object to represent rows.
 This allows us to treat the rows as if they were dictionaries instead of
 tuples.
 
-::
-
+```python
     def connect_db():
         """Connects to the specific database."""
         rv = sqlite3.connect(app.config['DATABASE'])
         rv.row_factory = sqlite3.Row
         return rv
+```
 
 With that out of the way, you should be able to start up the application
 without problems.  Do this with the following command::
@@ -264,9 +266,9 @@ When you head over to the server in your browser, you will get a 404 error
 because we don't have any views yet.  We will focus on that a little later,
 but first, we should get the database working.
 
-    Want your server to be publicly available?  Check out the
-    :ref:`externally visible server <public-server>` section for more
-    information.
+Want your server to be publicly available?  Check out the
+:ref:`externally visible server <public-server>` section for more
+information.
 
 
 ## Step 3: Database Connections
@@ -297,24 +299,26 @@ function.  The first time the function is called, it will create a database
 connection for the current context, and successive calls will return the
 already established connection::
 
-    def get_db():
-        """Opens a new database connection if there is none yet for the
-        current application context.
-        """
-        if not hasattr(g, 'sqlite_db'):
-            g.sqlite_db = connect_db()
-        return g.sqlite_db
-
+```python
+def get_db():
+    """Opens a new database connection if there is none yet for the
+    current application context."""
+    if not hasattr(g, 'sqlite_db'):
+        g.sqlite_db = connect_db()
+    return g.sqlite_db
+```
 
 So now we know how to connect, but how do we properly disconnect?  For
 that, Flask provides us with the :meth:`~flask.Flask.teardown_appcontext`
 decorator.  It's executed every time the application context tears down::
 
-    @app.teardown_appcontext
-    def close_db(error):
-        """Closes the database again at the end of the request."""
-        if hasattr(g, 'sqlite_db'):
-            g.sqlite_db.close()
+```python
+@app.teardown_appcontext
+def close_db(error):
+    """Closes the database again at the end of the request."""
+    if hasattr(g, 'sqlite_db'):
+        g.sqlite_db.close()
+```
 
 Functions marked with :meth:`~flask.Flask.teardown_appcontext` are called
 every time the app context tears down.  What does this mean?
@@ -423,12 +427,14 @@ the :class:`sqlite3.Row` row factory.
 The view function will pass the entries as dictionaries to the
 :file:`show_entries.html` template and return the rendered one::
 
-    @app.route('/')
-    def show_entries():
-        db = get_db()
-        cur = db.execute('select title, text from entries order by id desc')
-        entries = cur.fetchall()
-        return render_template('show_entries.html', entries=entries)
+```python
+@app.route('/')
+def show_entries():
+    db = get_db()
+    cur = db.execute('select title, text from entries order by id desc')
+    entries = cur.fetchall()
+    return render_template('show_entries.html', entries=entries)
+```
 
 ### Add New Entry
 
@@ -438,16 +444,18 @@ responds to ``POST`` requests; the actual form is shown on the
 :func:`~flask.flash` an information message to the next request and
 redirect back to the `show_entries` page::
 
-    @app.route('/add', methods=['POST'])
-    def add_entry():
-        if not session.get('logged_in'):
-            abort(401)
-        db = get_db()
-        db.execute('insert into entries (title, text) values (?, ?)',
-                     [request.form['title'], request.form['text']])
-        db.commit()
-        flash('New entry was successfully posted')
-        return redirect(url_for('show_entries'))
+```python
+@app.route('/add', methods=['POST'])
+def add_entry():
+    if not session.get('logged_in'):
+        abort(401)
+    db = get_db()
+    db.execute('insert into entries (title, text) values (?, ?)',
+        [request.form['title'], request.form['text']])
+    db.commit()
+    flash('New entry was successfully posted')
+    return redirect(url_for('show_entries'))
+```
 
 Note that we check that the user is logged in here (the `logged_in` key is
 present in the session and ``True``).
@@ -463,19 +471,21 @@ page.  In addition, a message is flashed that informs the user that he or
 she was logged in successfully.  If an error occurred, the template is
 notified about that, and the user is asked again::
 
-    @app.route('/login', methods=['GET', 'POST'])
-    def login():
-        error = None
-        if request.method == 'POST':
-            if request.form['username'] != app.config['USERNAME']:
-                error = 'Invalid username'
-            elif request.form['password'] != app.config['PASSWORD']:
-                error = 'Invalid password'
-            else:
-                session['logged_in'] = True
-                flash('You were logged in')
-                return redirect(url_for('show_entries'))
-        return render_template('login.html', error=error)
+```python
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != app.config['USERNAME']:
+            error = 'Invalid username'
+        elif request.form['password'] != app.config['PASSWORD']:
+            error = 'Invalid password'
+        else:
+            session['logged_in'] = True
+            flash('You were logged in')
+            return redirect(url_for('show_entries'))
+    return render_template('login.html', error=error)
+```
 
 The `logout` function, on the other hand, removes that key from the session
 again.  We use a neat trick here: if you use the :meth:`~dict.pop` method
@@ -484,11 +494,13 @@ will delete the key from the dictionary if present or do nothing when that
 key is not in there.  This is helpful because now we don't have to check
 if the user was logged in.
 
-    @app.route('/logout')
-    def logout():
-        session.pop('logged_in', None)
-        flash('You were logged out')
-        return redirect(url_for('show_entries'))
+```python
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out')
+    return redirect(url_for('show_entries'))
+```
 
 
 ## Step 6: The Templates
@@ -521,6 +533,7 @@ Jinja you can access missing attributes and items of objects / dicts which
 makes the following code work, even if there is no ``'logged_in'`` key in
 the session:
 
+```html
     <!doctype html>
     <title>Flaskr</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
@@ -538,6 +551,7 @@ the session:
       {% endfor %}
       {% block body %}{% endblock %}
     </div>
+```
 
 ### show_entries.html
 
@@ -547,6 +561,7 @@ in with the :func:`~flask.render_template` function.  We also tell the
 form to submit to your `add_entry` function and use ``POST`` as HTTP
 method:
 
+```html
     {% extends "layout.html" %}
     {% block body %}
       {% if session.logged_in %}
@@ -568,12 +583,14 @@ method:
       {% endfor %}
       </ul>
     {% endblock %}
+```
 
 ### login.html
 
 This is the login template, which basically just displays a form to allow
 the user to login:
 
+```html
     {% extends "layout.html" %}
     {% block body %}
       <h2>Login</h2>
@@ -588,7 +605,7 @@ the user to login:
         </dl>
       </form>
     {% endblock %}
-
+```
 
 ## Step 7: Adding Style
 
@@ -596,6 +613,7 @@ Now that everything else works, it's time to add some style to the
 application.  Just create a stylesheet called :file:`style.css` in the
 :file:`static` folder we created before:
 
+```css
     body            { font-family: sans-serif; background: #eee; }
     a, h1, h2       { color: #377ba8; }
     h1, h2          { font-family: 'Georgia', serif; margin: 0; }
@@ -614,7 +632,7 @@ application.  Just create a stylesheet called :file:`style.css` in the
     .flash          { background: #cee5F5; padding: 0.5em;
                       border: 1px solid #aacbe2; }
     .error          { background: #f0d6d6; padding: 0.5em; }
-
+```
 
 ## Bonus: Testing the Application
 
