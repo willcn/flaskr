@@ -54,9 +54,68 @@ templates you create later on in the tutorial will go in this directory.
 
 ## Step 1: About The Redis Database
 
-Redis is a simple key-value database. You can read more about it on their
-official [website](http://redis.io/). We will use it for our Flaskr project
-because it integrates very well into Python.
+Redis is a key-value database that is pre-installed in the Cloud9 development 
+environment. Redis can integrate transparently with Python, providing a 
+permanent data store for Python lists and dicts. For the purpose of this Flask
+tutorial, it's not necessary to learn how it works in complete detail. You can 
+read more about it on their official [website](http://redis.io/).
+
+In order to use Redis for our Flask application, you need to run 
+`sudo service redis-server start` in the console. You should see something 
+like this:
+
+    willfongqq@flaskr:~/workspace (master) $ sudo service redis-server start
+    Starting redis-server: redis-server.
+    willfongqq@flaskr:~/workspace (master) $ 
+
+The rest of this is a quick overview of Redis. It isn't necessary and most 
+people can just skip the rest of this step.
+
+Redis records are stored as a key / value pair:
+
+    <key> | <value>
+    
+The keys and values can be almost any type of string you want. For example:
+
+    username | willfongqq
+    
+The key is `username` and the value stored in that record is `willfongqq`. 
+
+When you need a record from the database, you provide the key, `username`, 
+and Redis will provide the value associated with it, `willfongqq`. 
+
+To access Redis, you need to run `redis-cli`:
+
+    willfongqq@flaskr:~/workspace (master) $ redis-cli 
+    127.0.0.1:6379> 
+
+To store a key, you run `SET <key> <value>`:
+
+    127.0.0.1:6379> SET username willfongqq
+    OK
+
+To get the value of the key, you run: `GET <key>`:
+
+    127.0.0.1:6379> GET username
+    "willfongqq"
+
+For this Flask tutorial, we're going to store a list. Redis has support for 
+this as well. We use `RPUSH` to *push* a value to the list. Let's create a 
+list of technology companies:
+
+    127.0.0.1:6379> RPUSH companies apple
+    (integer) 1
+    127.0.0.1:6379> RPUSH companies google
+    (integer) 2
+    127.0.0.1:6379> RPUSH companies microsoft
+    (integer) 3
+
+You can see that each time we add a company, we get a number back of how many
+records there are in the list. We can access the list with the `LRANGE`
+command, followed by the name of the list, and the record 
+
+
+
 
 
 ## Step 2: Application Setup Code
