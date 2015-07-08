@@ -68,13 +68,11 @@ like this:
     Starting redis-server: redis-server.
     willfongqq@flaskr:~/workspace (master) $ 
 
-The rest of this is a quick overview of Redis. 
+The Python module `redis-collections` handles all the Redis operations behing
+the scenes. You don't need to know how Redis works at all. But I wrote up a
+little overview of how to use Redis for anyone interested.
 
-** You can skip the rest of this step. **
-
-But I wrote up this section for anyone who wants to know a little more about it.
-
-----
+** ! You can skip to the next step ! **
 
 Redis records are stored as a key / value pair:
 
@@ -140,7 +138,7 @@ of 0. For example, `apple` is the first entry in our list, so it has an index
 of `0`. `google` is the second entry in the list, so it has an index of `1`.
 So, to get the first item `apple`, we would use `0` and `0` for the index
 positions:
-    
+
     127.0.0.1:6379> LRANGE companies 0 0
     1) "apple"
 
@@ -152,7 +150,11 @@ And for the third item, `microsoft`, we would use `2` and `2`:
 A negative number would tell Redis to count from the end of the list. In our
 original example, we had `-1`, which meant "stop at the last entry of the 
 list". A value of `-2` would mean "stop at the second to the last entry of the
-list", in this case, would have been `google`. 
+list", in this case, would have been `google`:
+
+    127.0.0.1:6379> LRANGE companies 0 -2
+    1) "apple"
+    2) "google"
 
 Confusing? I'm sorry about that...
 
