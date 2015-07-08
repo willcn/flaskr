@@ -68,8 +68,13 @@ like this:
     Starting redis-server: redis-server.
     willfongqq@flaskr:~/workspace (master) $ 
 
-The rest of this is a quick overview of Redis. It isn't necessary and most 
-people can just skip the rest of this step.
+The rest of this is a quick overview of Redis. 
+
+** You can skip the rest of this step. **
+
+But I wrote up this section for anyone who wants to know a little more about it.
+
+----
 
 Redis records are stored as a key / value pair:
 
@@ -111,11 +116,45 @@ list of technology companies:
     (integer) 3
 
 You can see that each time we add a company, we get a number back of how many
-records there are in the list. We can access the list with the `LRANGE`
-command, followed by the name of the list, and the record 
+records there are in the list. 
 
+We can retrieve the list with the `LRANGE` command. For `LRANGE`, you will need
+to specify the name of the list as well as the starting indexing and ending
+index:
 
+    LRANGE <list name> <starting index> <ending index>
 
+To get all the companies, you would run a query like this:
+
+    127.0.0.1:6379> LRANGE companies 0 -1
+    1) "apple"
+    2) "google"
+    3) "microsoft"
+
+The `0` and `-1` are going to be a little confusing, so let's explain that a 
+bit. 
+
+The index of a entry is the *position* of the value in the list. This is going
+to be a little confusing at first, but in Redis, the first entry has an index 
+of 0. For example, `apple` is the first entry in our list, so it has an index
+of `0`. `google` is the second entry in the list, so it has an index of `1`.
+So, to get the first item `apple`, we would use `0` and `0` for the index
+positions:
+    
+    127.0.0.1:6379> LRANGE companies 0 0
+    1) "apple"
+
+And for the third item, `microsoft`, we would use `2` and `2`:
+
+    127.0.0.1:6379> LRANGE companies 2 2
+    1) "microsoft"
+
+A negative number would tell Redis to count from the end of the list. In our
+original example, we had `-1`, which meant "stop at the last entry of the 
+list". A value of `-2` would mean "stop at the second to the last entry of the
+list", in this case, would have been `google`. 
+
+Confusing? I'm sorry about that...
 
 
 ## Step 2: Application Setup Code
