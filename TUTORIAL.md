@@ -72,7 +72,7 @@ The Python module `redis-collections` handles all the Redis operations behing
 the scenes. You don't need to know how Redis works at all. But I wrote up a
 little overview of how to use Redis for anyone interested.
 
-** ! You can skip to the next step ! **
+**! You can skip to the next step !**
 
 Redis records are stored as a key / value pair:
 
