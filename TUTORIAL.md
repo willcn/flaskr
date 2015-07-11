@@ -41,9 +41,11 @@ one of the popular NoSQL databases if your data is more suited for those.
 
 Before we get started, let's create the folders needed for this application:
 
-    /flaskr
-      /static
-      /templates
+```
+/flaskr
+  /static
+  /templates
+```
 
 The flaskr folder is not a Python package, but just something where we drop 
 our files. The files inside the `static` folder are available to users of the 
@@ -64,9 +66,11 @@ In order to use Redis for our Flask application, you need to run
 `sudo service redis-server start` in the console. You should see something 
 like this:
 
-    willfongqq@flaskr:~/workspace (master) $ sudo service redis-server start
-    Starting redis-server: redis-server.
-    willfongqq@flaskr:~/workspace (master) $ 
+```
+willfongqq@flaskr:~/workspace (master) $ sudo service redis-server start
+Starting redis-server: redis-server.
+willfongqq@flaskr:~/workspace (master) $ 
+```
 
 The Python module `redis-collections` handles all the Redis operations behing
 the scenes. You don't need to know how Redis works at all. But I wrote up a
@@ -76,12 +80,16 @@ little overview of how to use Redis for anyone interested.
 
 Redis records are stored as a key / value pair:
 
-    <key> | <value>
-    
+```
+<key> | <value>
+```
+
 The keys and values can be almost any type of string you want. For example:
 
-    username | willfongqq
-    
+```
+username | willfongqq
+```
+
 The key is `username` and the value stored in that record is `willfongqq`. 
 
 When you need a record from the database, you provide the key, `username`, 
@@ -89,29 +97,37 @@ and Redis will provide the value associated with it, `willfongqq`.
 
 To access Redis, you need to run `redis-cli`:
 
-    willfongqq@flaskr:~/workspace (master) $ redis-cli 
-    127.0.0.1:6379> 
+```
+willfongqq@flaskr:~/workspace (master) $ redis-cli 
+127.0.0.1:6379> 
+```
 
 To store a key, you run `SET <key> <value>`:
 
-    127.0.0.1:6379> SET username willfongqq
-    OK
+```
+127.0.0.1:6379> SET username willfongqq
+OK
+```
 
 To get the value of the key, you run: `GET <key>`:
 
-    127.0.0.1:6379> GET username
-    "willfongqq"
+```
+127.0.0.1:6379> GET username
+"willfongqq"
+```
 
 For this Flask tutorial, we're going to store a list. Redis has support for 
 this as well. We use `RPUSH` to *push* a value to the list. Let's create a 
 list of technology companies:
 
-    127.0.0.1:6379> RPUSH companies apple
-    (integer) 1
-    127.0.0.1:6379> RPUSH companies google
-    (integer) 2
-    127.0.0.1:6379> RPUSH companies microsoft
-    (integer) 3
+```
+127.0.0.1:6379> RPUSH companies apple
+(integer) 1
+127.0.0.1:6379> RPUSH companies google
+(integer) 2
+127.0.0.1:6379> RPUSH companies microsoft
+(integer) 3
+```
 
 You can see that each time we add a company, we get a number back of how many
 records there are in the list. 
@@ -120,14 +136,18 @@ We can retrieve the list with the `LRANGE` command. For `LRANGE`, you will need
 to specify the name of the list as well as the starting indexing and ending
 index:
 
-    LRANGE <list name> <starting index> <ending index>
+```
+LRANGE <list name> <starting index> <ending index>
+```
 
 To get all the companies, you would run a query like this:
 
-    127.0.0.1:6379> LRANGE companies 0 -1
-    1) "apple"
-    2) "google"
-    3) "microsoft"
+```
+127.0.0.1:6379> LRANGE companies 0 -1
+1) "apple"
+2) "google"
+3) "microsoft"
+```
 
 The `0` and `-1` are going to be a little confusing, so let's explain that a 
 bit. 
@@ -139,22 +159,28 @@ of `0`. `google` is the second entry in the list, so it has an index of `1`.
 So, to get the first item `apple`, we would use `0` and `0` for the index
 positions:
 
-    127.0.0.1:6379> LRANGE companies 0 0
-    1) "apple"
+```
+127.0.0.1:6379> LRANGE companies 0 0
+1) "apple"
+```
 
 And for the third item, `microsoft`, we would use `2` and `2`:
 
-    127.0.0.1:6379> LRANGE companies 2 2
-    1) "microsoft"
+```
+127.0.0.1:6379> LRANGE companies 2 2
+1) "microsoft"
+```
 
 A negative number would tell Redis to count from the end of the list. In our
 original example, we had `-1`, which meant "stop at the last entry of the 
 list". A value of `-2` would mean "stop at the second to the last entry of the
 list", in this case, would have been `google`:
 
-    127.0.0.1:6379> LRANGE companies 0 -2
-    1) "apple"
-    2) "google"
+```
+127.0.0.1:6379> LRANGE companies 0 -2
+1) "apple"
+2) "google"
+```
 
 Confusing? I'm sorry about that...
 
@@ -176,7 +202,7 @@ First, we add the imports in `flaskr.py`:
 import os
 from redis_collections import List
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-         render_template, flash
+    render_template, flash
 ```
 
 Next, we can create our actual application and initialize it with the
